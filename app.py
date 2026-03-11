@@ -131,6 +131,7 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
+# FIXME: Attempts reset to 0 while the game logic assumes attempts start at 1
 if new_game:
     st.session_state.attempts = 0
     st.session_state.secret = random.randint(1, 100)
@@ -149,12 +150,14 @@ if submit:
 
     ok, guess_int, err = parse_guess(raw_guess)
 
+    # FIXME: Invalid guesses are added to history as raw strings.
+# This mixes strings with integers and causes corrupted history entries.
     if not ok:
-        st.session_state.history.append(raw_guess)
         st.error(err)
     else:
         st.session_state.history.append(guess_int)
-
+        # FIXME: Secret number is sometimes converted to a string.
+        # Comparing an int guess with a string secret causes incorrect hints.
         if st.session_state.attempts % 2 == 0:
             secret = str(st.session_state.secret)
         else:
